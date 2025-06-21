@@ -35,4 +35,19 @@ public class KafkaProducerConfig {
     public KafkaTemplate<String, Course> courseKafkaTemplate(){
         return new KafkaTemplate<>(courseProducerFactory());
     }
+
+    @Bean
+    public ProducerFactory<String, String> registrationProducerFactory(){
+        Map<String, Object> config = new HashMap<>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server_add);
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> registrationKafkaTemplate(){
+        return new KafkaTemplate<>(registrationProducerFactory());
+    }
 }

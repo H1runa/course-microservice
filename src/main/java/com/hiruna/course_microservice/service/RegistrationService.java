@@ -3,6 +3,7 @@ package com.hiruna.course_microservice.service;
 import com.hiruna.course_microservice.data.*;
 import com.hiruna.course_microservice.data.dto.StudentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -10,7 +11,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class RegistrationService {
@@ -20,6 +20,9 @@ public class RegistrationService {
     private CourseService courseService;
     @Autowired
     private StudentClient stdClient;
+    @Autowired
+    private KafkaTemplate<String, String> registrationKafkaTemplate;
+    private final java.util.Date date = new java.util.Date();
 
     public Registration createRegistration(Registration reg){
         if (stdClient.studentExists(reg.getStudent_id()) && courseService.courseExistsById(reg.getCourse_id())){
@@ -29,7 +32,13 @@ public class RegistrationService {
             Date sqlDate = Date.valueOf(LocalDate.now());
             reg.setReg_date(sqlDate);
 
-            return regRepo.save(reg);
+            Registration registration = regRepo.save(reg);
+
+            //logging
+            String log = String.format("[%tc] [%s][%d] [%s] was registered for [%s]%n", date, "RegistrationCreated", registration.getId(), std.getName(), course.get().getName());
+            registrationKafkaTemplate.send("registration-events", "RegistrationCreated", log);
+
+            return registration;
         }
         return null;
     }
