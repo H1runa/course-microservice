@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class CourseController {
@@ -30,6 +31,16 @@ public class CourseController {
     @GetMapping(path = "/courses", params = {"name"})
     public List<Course> getCoursesByName(@RequestParam String name){
         return cService.getCoursesByName(name);
+    }
+
+    @DeleteMapping(path = "/courses/{id}/delete")
+    public void deleteCourse(@PathVariable int id){
+        cService.deleteCourse(id);
+    }
+
+    @GetMapping(path = "/courses/{id}")
+    public Optional<Course> getCourseById(@PathVariable int id){
+        return cService.getCourseById(id);
     }
 
 
